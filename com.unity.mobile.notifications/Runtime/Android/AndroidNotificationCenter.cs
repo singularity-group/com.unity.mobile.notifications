@@ -298,13 +298,13 @@ namespace Unity.Notifications.Android
         /// Schedule a notification which will be shown at the time specified in the notification struct.
         /// The returned id can later be used to update the notification before it's triggered, it's current status can be tracked using CheckScheduledNotificationStatus.
         /// </summary>
-        public static int SendNotification(AndroidNotification notification, string channel)
+        public static int SendNotification(AndroidNotification notification, string channel, bool immediately = false)
         {
             if (!Initialize())
                 return -1;
 
             int id = Math.Abs(DateTime.Now.ToString("yyMMddHHmmssffffff").GetHashCode()) + (new System.Random().Next(10000));
-            SendNotification(id, notification, channel);
+            SendNotification(id, notification, channel, immediately);
 
             return id;
         }
@@ -319,7 +319,7 @@ namespace Unity.Notifications.Android
             return (NotificationStatus)status;
         }
 
-        internal static void SendNotification(int id, AndroidNotification notification, string channel)
+        internal static void SendNotification(int id, AndroidNotification notification, string channel, bool immediately = false)
         {
             if (notification.fireTime < 0L)
             {
@@ -358,7 +358,8 @@ namespace Unity.Notifications.Android
 
             notificationIntent.Call<AndroidJavaObject>("putExtra", "timestamp", timestampValue);
 
-            notificationManager.Call("scheduleNotificationIntent", notificationIntent);
+            var methodId = immediately ? "sendNotification" : "scheduleNotificationIntent";
+            notificationManager.Call(methodId, notificationIntent);
         }
 
         /// <summary>

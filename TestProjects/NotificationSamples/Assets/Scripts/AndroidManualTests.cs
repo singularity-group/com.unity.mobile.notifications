@@ -109,7 +109,7 @@ public class AndroidManualTests : MonoBehaviour
         notification.Color = Color.magenta;
         notification.SmallIcon = "icon_0";;
 
-        AndroidNotificationCenter.SendNotification(notification, "channel_id");
+        AndroidNotificationCenter.SendNotification(notification, "channel_id", true);
 
         AndroidNotificationCenter.OnNotificationReceived += (id) => {
             Debug.Log("Received notification : " + id.ToString());

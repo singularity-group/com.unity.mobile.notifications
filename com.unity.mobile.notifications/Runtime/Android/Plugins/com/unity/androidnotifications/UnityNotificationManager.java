@@ -491,6 +491,17 @@ public class UnityNotificationManager extends BroadcastReceiver {
         }
     }
 
+    public void sendNotification(Intent intent) {
+        int id = intent.getIntExtra("id", 0);
+
+        Intent openAppIntent = UnityNotificationManager.buildOpenAppIntent(intent, mContext, mOpenActivity);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, id, openAppIntent, 0);
+
+        intent.putExtra("tapIntent", pendingIntent);
+
+        sendNotification(mContext, intent);
+    }
+
     // Send a notification.
     protected static void sendNotification(Context context, Intent intent) {
         Notification.Builder notificationBuilder = UnityNotificationManager.buildNotification(context, intent);
