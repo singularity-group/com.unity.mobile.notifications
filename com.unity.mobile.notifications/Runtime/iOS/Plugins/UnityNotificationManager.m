@@ -31,6 +31,8 @@ const int kDefaultPresentationOptions = -1;
 
 - (void)checkAuthorizationFinished
 {
+    NSLog(@"checkAuthorizationFinished %d", self.authorizationRequestFinished);
+
     bool requestRejected = self.authorizationRequestFinished && !self.authorized;
 
     if (!requestRejected && self.needRemoteNotifications && self.remoteNotificationsRegistered == UNAuthorizationStatusNotDetermined)
@@ -73,10 +75,13 @@ const int kDefaultPresentationOptions = -1;
         self.authorized = granted;
         if (self.authorized)
         {
+            NSLog(@"registerRemote %d", registerRemote);
             if (registerRemote)
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    NSLog(@"Before registerForRemoteNotifications");
                     [[UIApplication sharedApplication] registerForRemoteNotifications];
+                    NSLog(@"After registerForRemoteNotifications");
                     self.authorizationRequestFinished = YES;
                 });
             }
@@ -98,6 +103,7 @@ const int kDefaultPresentationOptions = -1;
 
 - (void)setDeviceTokenFromNSData:(NSData *)deviceTokenData
 {
+    NSLog(@"setDeviceTokenFromNSData");
     NSUInteger len = deviceTokenData.length;
     if (len == 0)
         return;
@@ -109,6 +115,7 @@ const int kDefaultPresentationOptions = -1;
         [str appendFormat: @"%02x", buffer[i]];
     }
     self.deviceToken = [str copy];
+    NSLog(@"setDeviceTokenFromNSData: %@", self.deviceToken);
 }
 
 //Called when a notification is delivered to a foreground app.
