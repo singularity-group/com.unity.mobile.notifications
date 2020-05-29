@@ -15,6 +15,7 @@ MonoBehaviour:
   ButtonName: Empty Repeatable  notification
   Channel: default_channel
   FireInSeconds: 0
+  NotificationID: 0
   Title: 
   Text: 
   SmallIcon: 

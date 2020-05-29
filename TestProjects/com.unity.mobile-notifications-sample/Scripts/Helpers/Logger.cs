@@ -8,6 +8,7 @@ namespace Unity.Notifications.Tests.Sample
     public class Logger
     {
         public Text LogsText;
+        private readonly string[] hex = {"0", "1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}; 
 
         public static class Colors
         {
@@ -17,6 +18,7 @@ namespace Unity.Notifications.Tests.Sample
             public const string Green = "#2ecc71";
             public const string Orange = "#f1c40f";
             public const string Red = "#e74c3c";
+            
         }
 
         public Logger(Text textComponent)
@@ -55,6 +57,8 @@ namespace Unity.Notifications.Tests.Sample
 
         public Logger Blue(string text, int tabs = 0)
         {
+            Random r = new Random();
+            string myString = Colors.Blue.Remove(Colors.Blue.Length-1)+ hex[r.Next(0, hex.Length)];          //Colors.Blue.Substring(Colors.Blue.Length - 1);
             LogsText.text += $"<color={Colors.Blue}>{ProcessText(text, tabs)}</color>";
             return this;
         }

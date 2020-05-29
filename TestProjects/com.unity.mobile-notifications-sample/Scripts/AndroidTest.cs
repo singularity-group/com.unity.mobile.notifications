@@ -21,7 +21,8 @@ namespace Unity.Notifications.Tests.Sample
         private Logger m_LOGGER;
         private int _notificationExplicidID;
         private Button ButtonExplicitID;
-
+        private GameObject notificationEditCanvas;
+        
         public int notificationExplicidID
         {
             get { return _notificationExplicidID; }
@@ -107,6 +108,12 @@ namespace Unity.Notifications.Tests.Sample
             }
         }
 
+
+        private void fillNotificationList(){
+            
+        }
+
+
         private void InstantiateAllTestButtons()
         {
             m_groups = new Dictionary<string, OrderedDictionary>();
@@ -117,9 +124,12 @@ namespace Unity.Notifications.Tests.Sample
             m_groups["Modify"] = new OrderedDictionary();
             //m_groups["Modify"]["Create notification preset"] = new Action(() => {  });
             m_groups["Modify"]["Modify pending Explicit notification"] = new Action(() => { ModifyExplicitNotification(); });
+            m_groups["Modify"]["Create new notification template"] = new Action(() => { CreateNotificationTemplate(); });
 
             m_groups["Send"] = new OrderedDictionary();
-            foreach (AndroidNotificationTemplate template in Resources.LoadAll("AndroidNotifications", typeof(AndroidNotificationTemplate)))
+            var loadedNotifications = Resources.LoadAll("AndroidNotifications", typeof(AndroidNotificationTemplate));
+            print("AAAAA  "+ loadedNotifications.GetType());
+            foreach (AndroidNotificationTemplate template in loadedNotifications)
             {
                 if (template == null) continue;
                 m_groups["Send"][$"[{template.FireInSeconds}s] {template.ButtonName}"] = new Action(() => {
@@ -211,7 +221,6 @@ namespace Unity.Notifications.Tests.Sample
                 {
                     Transform button = GameObject.Instantiate(buttonGameObject, buttonGroup);
                     button.name = group.Key.ToString() + "/" + test.Key.ToString();
-                    Debug.Log("NAMING  " + button.name);
                     button.gameObject.GetComponentInChildren<Text>().text = test.Key.ToString();
                     button.GetComponent<Button>().onClick.AddListener(delegate {
                         try
@@ -230,20 +239,41 @@ namespace Unity.Notifications.Tests.Sample
             ButtonExplicitID = GameObject.Find("Modify/Modify pending Explicit notification").GetComponent<Button>();
             ButtonExplicitID.interactable = false;
             m_gameObjectReferences.ButtonGroupTemplate.gameObject.SetActive(false);
+
+            
+            InterfaceConstructor ic = gameObject.GetComponent<InterfaceConstructor>();
+            notificationEditCanvas = ic.createCanvas();
+            GameObject go = ic.createPanel(200, 200, notificationEditCanvas.transform);
+            ic.AddLayoutGroup(go, false);
+
+            PropertyInfo[] properties = typeof(AndroidNotification).GetProperties();
+            GameObject propertyGO;
+            foreach (PropertyInfo property in properties)
+            {
+                //property.SetValue(record, value);
+                propertyGO = ic.createPanel(200, 200, go.transform);
+                ic.AddLayoutGroup(propertyGO, true);
+                propertyGO.name=property.Name;
+                ic.createText(property.Name, propertyGO.transform);
+
+               // print(property.PropertyType.ToString()); 
+                switch (property.PropertyType.ToString()){
+                    case "System.String":
+                        ic.createInputField(InputField.ContentType.IntegerNumber, propertyGO.transform);
+                        break;
+                    case "System.Boolean":
+                        ic.createToggle(20, propertyGO.transform);                    
+                        break;
+                }
+            }
+            GameObject btn = ic.createButton("Confirm notification changes", go.transform);
+            print("BBB  "+btn);
+            btn.GetComponent<Button>().onClick.AddListener(AddToTemplates);
+            notificationEditCanvas.SetActive(false);
         }
 
-        public void ModifyExplicitNotification()
-        {
-            AndroidNotification template = new AndroidNotification() //TODO: TEMPORARY,Implement GUI for Notification building
-            {
-                Title = "Modified Explicit Notification title",
-                Text = "Modified Explicit Notification text",
-                FireTime = System.DateTime.Now.AddSeconds(60)
-            };
-            AndroidNotificationCenter.UpdateScheduledNotification(notificationExplicidID, template, "default_channel");
-            m_LOGGER
-                .Blue($"[{DateTime.Now.ToString("HH:mm:ss.ffffff")}] Call {MethodBase.GetCurrentMethod().Name}")
-                .Properties(template, 1);
+        private void AddToTemplates(){
+            
         }
 
         public void SendNotification(AndroidNotification notification, string channel = "default_channel", int notificationID = 0, bool log = true)
@@ -321,6 +351,29 @@ namespace Unity.Notifications.Tests.Sample
             Canvas.ForceUpdateCanvases();
             m_gameObjectReferences.LogsScrollRect.verticalNormalizedPosition = 0f;
         }
+
+        public void ModifyExplicitNotification()
+        {
+            AndroidNotification template = new AndroidNotification() //TODO: TEMPORARY,Implement GUI for Notification building
+            {
+                Title = "Modified Explicit Notification title",
+                Text = "Modified Explicit Notification text",
+                FireTime = System.DateTime.Now.AddSeconds(60)
+            };
+            AndroidNotificationCenter.UpdateScheduledNotification(notificationExplicidID, template, "default_channel");
+            m_LOGGER
+                .Blue($"[{DateTime.Now.ToString("HH:mm:ss.ffffff")}] Call {MethodBase.GetCurrentMethod().Name}")
+                .Properties(template, 1);
+        }
+
+        public void CreateNotificationTemplate(){
+            notificationEditCanvas.SetActive(!notificationEditCanvas.activeSelf);
+            InstantiateAllTestButtons();
+        }
+
+
+
+
 
 #endif
     }
