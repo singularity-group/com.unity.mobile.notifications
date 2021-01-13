@@ -36,7 +36,7 @@ test_{{ platform.name }}_{{ editor.version }}:
     image: {{ platform.image }}
     flavor: {{ platform.flavor}}
   commands:
-    - npm install upm-ci-utils@stable -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
+    - npm install upm-ci-utils@latest -g --registry https://artifactory.prd.cds.internal.unity3d.com/artifactory/api/npm/upm-npm
     - upm-ci package test --package-path com.unity.mobile.notifications --unity-version {{ editor.version }} --platform editmode --extra-create-project-arg="-upmNoDefaultPackages"
     {% if editor.version == "2018.4" %}
     - upm-ci~/tools/utr/utr --suite=editor --editor-location=.Editor --testproject=TestProjects/NotificationSamples_2018_4_dotnet3.5 --artifacts_path=upm-ci~/test-results/test_2018_4_dotnet3.5/ --api-profile=NET_2_0_Subset
