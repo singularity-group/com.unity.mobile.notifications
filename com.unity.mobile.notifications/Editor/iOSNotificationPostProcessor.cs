@@ -79,6 +79,9 @@ public class iOSNotificationPostProcessor : MonoBehaviour
         if (needLocationFramework)
             pbxProject.AddFrameworkToProject(unityFrameworkTarget, "CoreLocation.framework", false);
 
+
+        AddCustomSoundFile(pbxProject, path, mainTarget);
+        
         File.WriteAllText(pbxProjectPath, pbxProject.WriteToString());
 
         // Update the entitlements file.
@@ -94,6 +97,21 @@ public class iOSNotificationPostProcessor : MonoBehaviour
             var capManager = new ProjectCapabilityManager(pbxProjectPath, entitlementsFileName, "Unity-iPhone");
             capManager.AddPushNotifications(!useReleaseAPSEnv);
             capManager.WriteToFile();
+        }
+    }
+
+    // G4G added
+    private static void AddCustomSoundFile(PBXProject pbx, string pathToBuiltProject, string unityIphoneTargetGuid) {
+        // copy file and add to pbx
+        try {
+            var projectRelativePath = "ios_notification.wav";
+            var projectPath = Path.Combine(pathToBuiltProject, projectRelativePath);
+            File.Copy(Path.Combine(Application.streamingAssetsPath, "ios_notification.wav"),
+                projectPath, true);
+            pbx.AddFileToBuild(unityIphoneTargetGuid,
+                pbx.AddFile(projectRelativePath, projectRelativePath));
+        } catch (Exception ex) {
+            Debug.Log(ex);
         }
     }
 
