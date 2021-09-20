@@ -362,16 +362,56 @@ bool validateAuthorizationStatus(UnityNotificationManager* manager)
         return;
     }
 
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier: identifier content: content trigger: trigger];
-
     // Schedule the notification.
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    [center addNotificationRequest: request withCompletionHandler:^(NSError * _Nullable error) {
-        if (error != NULL)
-            NSLog(@"%@", [error localizedDescription]);
+    NSString* imageUrlString = [userInfo valueForKey:@"image_url"];
+    if (imageUrlString) {
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_async(queue, ^{
+            NSURL *imageURL = [NSURL URLWithString:imageUrlString];
+            NSError *error;
+            NSString *tmpSubFolderName = [NSTemporaryDirectory() stringByAppendingPathComponent: @"notifications"];
+            NSLog(@"imageURL = %@", imageURL);
+            if ([NSFileManager.defaultManager createDirectoryAtURL:[NSURL fileURLWithPath:tmpSubFolderName isDirectory:true]  withIntermediateDirectories:true attributes:nil error:&error]) {
+                
+                NSURL *tmpImage = [NSURL fileURLWithPath:[tmpSubFolderName
+                                                          stringByAppendingPathComponent:imageURL.lastPathComponent]];
+                NSLog(@"copy image to: %@", tmpImage);
+                if ([NSFileManager.defaultManager copyItemAtURL:imageURL toURL:tmpImage error:&error]) {
+                    UNNotificationAttachment *icon = [UNNotificationAttachment attachmentWithIdentifier:@"image" URL:tmpImage options:nil error:&error];
+                    if (icon) {
+                        content.attachments = @[icon];
+                    }
+                    if (error) {
+                        NSLog(@"error while attaching image to notification: %@", error);
+                    }
+                } else {
+                    NSLog(@"copyItemAtURL failed for image file: %@", error);
+                }
+                
+            } else {
+                NSLog(@"Failed to create temp directory for image notification: %@", error);
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier: identifier content: content trigger: trigger];
+                [center addNotificationRequest: request withCompletionHandler:^(NSError * _Nullable error) {
+                    if (error != NULL)
+                        NSLog(@"%@", [error localizedDescription]);
 
-        [self updateScheduledNotificationList];
-    }];
+                    [self updateScheduledNotificationList];
+                }];
+            });
+        });
+    } else {
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier: identifier content: content trigger: trigger];
+        [center addNotificationRequest: request withCompletionHandler:^(NSError * _Nullable error) {
+            if (error != NULL)
+                NSLog(@"%@", [error localizedDescription]);
+
+            [self updateScheduledNotificationList];
+        }];
+    }
 }
 
 @end
