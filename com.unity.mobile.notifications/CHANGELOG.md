@@ -2,6 +2,23 @@
 
 All notable changes to this package will be documented in this file.
 
+## [1.4.3] - 2022-04-15
+
+### Fixes:
+- [Android] [issue 101](https://github.com/Unity-Technologies/com.unity.mobile.notifications/pull/101) Fix GC allocation every frame.
+- [1360115](https://issuetracker.unity3d.com/issues/mobile-notifications-project-settings-window-loses-focus-when-clicking-on-any-category-while-mobile-notifications-pane-is-open) Fixed focus loss when trying to switching from notifications settings.
+- [Android] [case 1376849] Fixed receivers needs to be marked as exported in manifest file, disable exact alarms on Android 12 because they require special permissions.
+- [iOS] [1375744](https://issuetracker.unity3d.com/issues/ios-app-freezes-slash-crashes-when-both-mobile-notifications-and-firebase-are-used) Fixed application startup hang when application uses Unity notifications or Firebase.
+- [iOS] [case 1382960] Handle numeric data in UserInfo.
+- [iOS] Correctly handle boolean values in UserInfo, previously boolean values were detected as numbers and get parsed as 1 or 0, now they will be correctly handled as 'true' and 'false'.
+
+## [1.4.2] - 2021-07-22
+
+### Fixes:
+- [Android] [issue 99](https://github.com/Unity-Technologies/com.unity.mobile.notifications/issues/99) Use FLAG_IMMUTABLE for PendingIntent
+- [iOS] Do not touch Plist file unless modifications are required
+- [iOS] [1348518](https://issuetracker.unity3d.com/product/unity/issues/guid/1348518) Fix crash in push notification (case )
+
 ## [1.4.1] - 2021-05-06
 
 ### Fixes:
