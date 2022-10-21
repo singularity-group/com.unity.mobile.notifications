@@ -276,10 +276,15 @@ bool validateAuthorizationStatus(UnityNotificationManager* manager)
     content.title = [NSString localizedUserNotificationStringForKey: dataTitle arguments: nil];
     content.body  = [NSString localizedUserNotificationStringForKey: dataBody arguments: nil];
     content.userInfo = userInfo;
-    
-    if ([userInfo valueForKey:@"image_url"]) {
-        NSURL *imageURL = [NSURL URLWithString:[userInfo valueForKey:@"image_url"]];
+
+    NSString* imageUrlString = [userInfo valueForKey:@"image_url"];
+    NSURL *imageURL = NULL;
+    // calling length on nil will also return 0
+    if ([imageUrlString length] > 0) {
+        imageURL = [NSURL URLWithString:imageUrlString];
         NSLog(@"imageURL = %@", imageURL);
+    }
+    if (imageURL) {
         NSError *error;
         UNNotificationAttachment *icon = [UNNotificationAttachment attachmentWithIdentifier:@"image" URL:imageURL options:nil error:&error];
         if (icon)
@@ -363,14 +368,11 @@ bool validateAuthorizationStatus(UnityNotificationManager* manager)
 
     // Schedule the notification.
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    NSString* imageUrlString = [userInfo valueForKey:@"image_url"];
-    if (imageUrlString) {
+    if (imageURL) {
         dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         dispatch_async(queue, ^{
-            NSURL *imageURL = [NSURL URLWithString:imageUrlString];
             NSError *error;
             NSString *tmpSubFolderName = [NSTemporaryDirectory() stringByAppendingPathComponent: @"notifications"];
-            NSLog(@"imageURL = %@", imageURL);
             if ([NSFileManager.defaultManager createDirectoryAtURL:[NSURL fileURLWithPath:tmpSubFolderName isDirectory:true]  withIntermediateDirectories:true attributes:nil error:&error]) {
                 
                 NSURL *tmpImage = [NSURL fileURLWithPath:[tmpSubFolderName
